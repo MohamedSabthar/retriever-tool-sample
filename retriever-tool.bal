@@ -101,7 +101,7 @@ isolated class Retriever {
     private isolated function generateEmbedding(string text) returns float[]|error {
         embeddings:CreateEmbeddingResponse res = check self.openaiEmbeddings->/embeddings.post({
             input: text,
-            model: "text-embedding-3-small"
+            model: "text-embedding-3-small" // TODO: these values can be movied to init
         });
         return res.data[0].embedding;
     }
