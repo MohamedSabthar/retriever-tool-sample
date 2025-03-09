@@ -1,9 +1,9 @@
 import ballerinax/ai.agent;
 
-configurable string apiKey = ?;
-configurable string deploymentId = ?;
-configurable string apiVersion = ?;
-configurable string serviceUrl = ?;
+// configurable string apiKey = ?;
+// configurable string deploymentId = ?;
+// configurable string apiVersion = ?;
+// configurable string serviceUrl = ?;
 
 configurable string pineconeServiceUrl = ?;
 configurable string pineconeKey = ?;
@@ -56,10 +56,10 @@ final agent:SystemPrompt systemPrompt = {
     "Avoid speculation and ensure responses align with the provided knowledge base. " +
     "Keep responses brief but informative, and where necessary, guide users to further resources."
 };
-final agent:Model model = check new agent:AzureOpenAiModel({auth: {apiKey}}, serviceUrl, deploymentId, apiVersion);
+// final agent:Model model = check new agent:AzureOpenAiModel({auth: {apiKey}}, serviceUrl, deploymentId, apiVersion);
+final agent:Model model = check new OllamaModel("http://localhost:11434", "llama3.2");
 final agent:Agent agent = check new (systemPrompt = systemPrompt, model = model,
-    tools = [retriever],
-    verbose = true
+    tools = [retriever]
 );
 
 service on new agent:Listener(8090) {
