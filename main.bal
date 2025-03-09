@@ -1,4 +1,3 @@
-// import ballerina/io;
 import ballerinax/ai.agent;
 
 configurable string apiKey = ?;
@@ -9,19 +8,20 @@ configurable string serviceUrl = ?;
 configurable string pineconeServiceUrl = ?;
 configurable string pineconeKey = ?;
 configurable string pineconeNamespace = ?;
-configurable string openAiEmbeddingToken = ?;
+configurable string openAiEmbeddingKey = ?;
 
-final Retriever faqRetriver = check new Retriever(
-    toolName = "FAQ_InformationRetriever",
-    toolDescription = "Retrieves relevant FAQ information about the Ballerina programming language," +
+isolated function createFaqRetrieverTool(Retriever retriever) returns agent:ToolConfig {
+    agent:ToolConfig faqRetrieverTool = retriever.getTools().pop();
+    faqRetrieverTool.name = "FAQ_InformationRetriever";
+    faqRetrieverTool.description = "Retrieves relevant FAQ information about the Ballerina programming language," +
     " including its features, usage, best practices, and latest updates. " +
-    "Always use this tool to provide accurate and up-to-date Ballerina-related knowledge.",
-    pineconeServiceUrl = pineconeServiceUrl,
-    pineconeKey = pineconeKey,
-    pineconeNamespace = pineconeNamespace,
-    openAiEmbeddingToken = openAiEmbeddingToken,
-    topK = 1
-);
+    "Always use this tool to provide accurate and up-to-date Ballerina-related knowledge.";
+    return faqRetrieverTool;
+}
+
+final PineconeConfig pineconeConfig = {serviceUrl: pineconeServiceUrl, apiKey: pineconeKey, namespace: pineconeNamespace};
+final OpenAiEmbeddingModelConfig embeddingModelConfig = {apiKey: openAiEmbeddingKey, modelName: "text-embedding-3-small"};
+final Retriever retriever = check new Retriever(pineconeConfig, embeddingModelConfig);
 
 // public function main() returns error? {
 //     string faqContent = check io:fileReadString("./resources/FAQ.md");
@@ -58,7 +58,7 @@ final agent:SystemPrompt systemPrompt = {
 };
 final agent:Model model = check new agent:AzureOpenAiModel({auth: {apiKey}}, serviceUrl, deploymentId, apiVersion);
 final agent:Agent agent = check new (systemPrompt = systemPrompt, model = model,
-    tools = [faqRetriver],
+    tools = [retriever],
     verbose = true
 );
 
